@@ -91,16 +91,31 @@ dsc dashboard:open
 
 4. Click on the **Red Hat OpenShift Dev Spaces** operator
 
-5. Click **Install**
+5. Create OpenShift-devspaces namespaces and Click **Install**
+
+```bash
+# Create devspaces namespace
+oc create namespace openshift-devspaces
+```
 
 6. Configure the installation:
-   - Choose the installation mode (All namespaces or specific namespace)
+   - Choose the openshift-devspaces namespace
    - Select the update channel
    - Choose approval strategy (Automatic or Manual)
 
 7. Click **Install** and wait for the operator to be installed
 
+```bash
+# Permissions to install Dev Spaces on OpenShift using web console
+oc apply -f devspaces-install-web-console.yaml
+```
+
 8. After installation, create a `CheCluster` custom resource to deploy Dev Spaces
+
+```bash
+# CheCluster CR
+oc apply -f checlustercrd.yaml
+```
 
 ## Post-Installation
 
@@ -195,6 +210,10 @@ oc get routes -n openshift-devspaces
 - [Download Page](https://developers.redhat.com/products/openshift-dev-spaces/download)
 - [GitHub Repository](https://github.com/redhat-developer/devspaces-chectl)
 
-## License
+## Gitlab
 
-This guide is provided for informational purposes. Refer to Red Hat's official documentation for the most up-to-date information.
+Important: OpenShift 4.20+ doesn't support short image names. (https://community.replicated.com/t/kubernetes-1-34-short-name-mode-is-enforcing/1591)
+
+You have to change from gitlab-redis deployment 'image: redis:6.2.6' by image: 'docker.io/library/redis:6.2.6'
+
+

@@ -1,0 +1,108 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gitlab
+  namespace: openshift-gitops
+spec:
+  destination:
+    namespace: gitlab
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    helm:
+      parameters:
+        - name: gitlab.image
+          value: quay.io/redhat-gpte/gitlab:17.4.1
+        - name: gitlab.email.address
+          value: gitlab@example.com
+        - name: gitlab.email.displayName
+          value: Janus Admin
+        - name: gitlab.email.replyTo
+          value: noreply@redhat.com
+        - name: gitlab.smtp.enabled
+          value: 'false'
+        - name: gitlab.smtp.domain
+          value: example.com
+        - name: gitlab.smtp.host
+          value: smtp.gitlab-gitlab.apps.ocp4.quitala.eu
+        - name: gitlab.smtp.port
+          value: '587'
+        - name: gitlab.smtp.user
+          value: gitlab
+        - name: gitlab.smtp.password
+          value: gitlab
+        - name: gitlab.ssh.host
+          value: ssh.gitlab-gitlab.apps.ocp4.quitala.eu
+        - name: gitlab.ssh.port
+          value: '22'
+        - name: gitlab.rootPassword
+          value: 
+        - name: gitlab.host
+          value: gitlab-gitlab.apps.ocp4.quitala.eu
+        - name: gitlab.https
+          value: 'true'
+        - name: gitlab.rootEmail
+          value: root@demo.redhat.com
+        - name: gitlab.keyBase.db
+          value: '0123456789'
+        - name: gitlab.keyBase.otp
+          value: '0123456789'
+        - name: gitlab.keyBase.secret
+          value: '0123456789'
+        - name: gitlab.postgresql.dbUser
+          value: gitlab
+        - name: gitlab.postgresql.dbPassword
+          value: passw0rd
+        - name: gitlab.postgresql.dbName
+          value: gitlab_production
+        - name: gitlab.groups[0].name
+          value: rhdh
+        - name: gitlab.groups[0].repo[0].name
+          value: trusted-application-pipeline-templates
+        - name: gitlab.groups[0].repo[0].url
+          value: >-
+            https://github.com/redhat-gpe/trusted-application-pipeline-templates.git
+        - name: gitlab.groups[0].repo[1].name
+          value: redhat-developer-templates
+        - name: gitlab.groups[0].repo[1].url
+          value: https://github.com/redhat-gpe/redhat-developer-templates.git
+        - name: gitlab.groups[0].repo[2].name
+          value: rhoai-on-rhdh-templates
+        - name: gitlab.groups[0].repo[2].url
+          value: https://github.com/redhat-gpe/rhoai-on-rhdh-templates.git
+        - name: gitlab.groups[1].name
+          value: workbench-setup
+        - name: gitlab.groups[1].repo[0].name
+          value: check-confidence-self-hosted-llm
+        - name: gitlab.groups[1].repo[0].url
+          value: https://github.com/redhat-gpe/check-confidence-self-hosted-llm.git
+        - name: gitlab.groups[1].repo[1].name
+          value: check-confidence-external-llm
+        - name: gitlab.groups[1].repo[1].url
+          value: https://github.com/redhat-gpe/check-confidence-external-llm.git
+        - name: gitlab.groups[2].name
+          value: gitops
+        - name: gitlab.groups[2].repo[0].name
+          value: janus-idp-gitops
+        - name: gitlab.groups[2].repo[0].url
+          value: https://github.com/redhat-gpe/janus-idp-gitops.git
+        - name: gitlab.users.count
+          value: '5'
+        - name: gitlab.users.base
+          value: user
+        - name: gitlab.users.password
+          value: 
+    path: charts/gitlab
+    repoURL: https://github.com/redhat-gpte-devopsautomation/agnosticg.git
+    targetRevision: HEAD
+  syncPolicy:
+    automated: {}
+    retry:
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m0s
+      limit: 2
+    syncOptions:
+      - CreateNamespace=true
+      - RespectIgnoreDifferences=true

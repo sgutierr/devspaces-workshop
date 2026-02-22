@@ -1,0 +1,90 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: devspaces-user-configmap
+  namespace: openshift-devspaces
+  labels:
+    app.kubernetes.io/part-of: che.eclipse.org
+    app.kubernetes.io/component: workspaces-config
+data:
+  ...
+
+# Learn how to use OpenShift Dev Spaces to synchronize ConfigMaps, Secrets, PersistentVolumeClaim and other 
+# Kubernetes objects from openshift-devspaces namespace to numerous user-specific namespaces.
+# The OpenShift Dev Spaces automates the synchronization of important configuration data, such as shared credentials,
+# configuration files, and certificates to user namespaces.
+#If you make changes to a Kubernetes resource in an openshift-devspaces namespace, 
+#OpenShift Dev Spaces will immediately synchronize the changes across all users namespaces. 
+# In reverse, if a Kubernetes resource is modified in a user namespace, OpenShift Dev Spaces will immediately 
+#revert the changes.
+
+---
+
+#Add the following labels if you do not want the ConfigMap to be mounted automatically:
+
+controller.devfile.io/watch-configmap: "false"
+controller.devfile.io/mount-to-devworkspace: "false"
+
+
+# Create the PersistentVolumeClaim below to create it to every user project.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: devspaces-user-pvc
+  namespace: openshift-devspaces
+  labels:
+    app.kubernetes.io/part-of: che.eclipse.org
+    app.kubernetes.io/component: workspaces-config
+spec:
+  ...
+
+
+---
+
+#A Template object to replicate all resources defined within the template across each user project.
+
+# Aside from the previously mentioned ConfigMap, Secret, and PersistentVolumeClaim, Template objects can include:
+
+#LimitRange NetworkPolicy ResourceQuota RoleRoleBinding
+
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: devspaces-user-namespace-configurator
+  namespace: openshift-devspaces
+  labels:
+    app.kubernetes.io/part-of: che.eclipse.org
+    app.kubernetes.io/component: workspaces-config
+objects:
+- apiVersion: v1
+  kind: ResourceQuota
+  metadata:
+    name: devspaces-user-resource-quota
+  spec:
+    ...
+- apiVersion: v1
+  kind: LimitRange
+  metadata:
+    name: devspaces-user-resource-constraint
+  spec:
+    ...
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: Role
+  metadata:
+    name: devspaces-user-roles
+  rules:
+    ...
+- apiVersion: rbac.authorization.k8s.io/v1
+  kind: RoleBinding
+  metadata:
+    name: devspaces-user-rolebinding
+  roleRef:
+    apiGroup: rbac.authorization.k8s.io
+    kind: Role
+    name: devspaces-user-roles
+  subjects:
+  - kind: User
+    apiGroup: rbac.authorization.k8s.io
+    name: ${PROJECT_ADMIN_USER}
+parameters:
+- name: PROJECT_ADMIN_USER
